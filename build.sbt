@@ -7,7 +7,8 @@ lazy val root = project
     version := "0.1.0-SNAPSHOT",
     scalaVersion := scala3Version,
     libraryDependencies += "org.scalameta" %% "munit" % "1.0.2" % Test,
-    libraryDependencies += "org.typelevel" %% "cats-effect" % "3.5.4"
+    libraryDependencies += "org.typelevel" %% "cats-effect" % "3.5.4",
+    libraryDependencies += "com.google.guava" % "guava" % "33.3.1-jre"
   )
 
 scalacOptions += "-Wnonunit-statement"
