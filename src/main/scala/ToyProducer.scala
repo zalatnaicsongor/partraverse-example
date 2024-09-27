@@ -2,11 +2,18 @@ import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.SettableFuture
 
 import java.util
+import java.util.concurrent.Executors
 import java.util.concurrent.LinkedBlockingQueue
 
 class ToyProducer extends AutoCloseable {
   @volatile private var interrupted = false
   private val queue = new LinkedBlockingQueue[QueueElement](3)
+
+  private val threadPool = Executors.newCachedThreadPool()
+
+  System.out.println(threadPool.submit(new Runnable {
+    override def run(): Unit = startProcessing()
+  }))
 
   def publish(record: String): ListenableFuture[String] = {
     val future = SettableFuture.create[String]
@@ -15,7 +22,7 @@ class ToyProducer extends AutoCloseable {
     future
   }
 
-  def startProcessing(): Unit = {
+  private def startProcessing(): Unit = {
     System.out.println("starting to process the queue... @ " + Thread.currentThread().getName)
     while !interrupted do {
       try {
@@ -35,6 +42,10 @@ class ToyProducer extends AutoCloseable {
     }
   }
 
-  override def close(): Unit = interrupted = true
+  override def close(): Unit = {
+    interrupted = true
+    threadPool.close()
+  }
+
+  private case class QueueElement(record: String, response: SettableFuture[String])
 }
-case class QueueElement(record: String, response: SettableFuture[String])
